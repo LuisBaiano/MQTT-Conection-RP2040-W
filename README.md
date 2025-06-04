@@ -7,8 +7,6 @@
 
 ##  Índice
 
-- [Pico W MQTT: Sistema de Monitoramento e Controle Agrícola Inteligente ](#pico-w-mqtt-sistema-de-monitoramento-e-controle-agrícola-inteligente-)
-  - [ Índice](#-índice)
   - [ Objetivos do Projeto](#-objetivos-do-projeto)
   - [ Descrição do Projeto](#-descrição-do-projeto)
     - [ Fluxo de Dados e Controle](#-fluxo-de-dados-e-controle)
