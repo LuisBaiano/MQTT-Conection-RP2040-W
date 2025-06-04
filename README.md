@@ -54,7 +54,7 @@ Este projeto transforma a Raspberry Pi Pico W em um **"Nó Agrícola Inteligente
 
 1.  **Coleta de Dados dos Sensores (Reais e Simulados):**
     *   **DHT22 (Sensor Externo):** Coleta leituras reais de **Temperatura do Ar** e **Umidade do Ar**.
-    *   **LDR (Sensor Externo):** Mede a **Luminosidade Ambiente** (publicado como "BAIXA", "MEDIA", "ALTA").
+    *   **LDR (Sensor Externo):** Mede a **Luminosidade Ambiente** (publicado como "BAIXA", "ALTA").
     *   **Joystick (ADC):** Simula o **Nível do Reservatório de Água** (publicado como "BAIXO", "MEDIO", "ALTO").
 2.  **Controle Local de Atuadores:**
     *   **Botões Físicos:** Permitem ligar/desligar a "Irrigação" e a "Luz Artificial" diretamente no dispositivo.
