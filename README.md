@@ -20,11 +20,7 @@
     - [ Configuração do Broker MQTT](#-configuração-do-broker-mqtt)
     - [ Testes](#-testes)
   - [ Estrutura do Código](#️-estrutura-do-código)
-  - [ Melhorias Futuras](#-melhorias-futuras)
-  - [ Como Contribuir (Opcional)](#-como-contribuir-opcional)
-  - [ Licença (Opcional)](#-licença-opcional)
-  - [ Vídeo de Demonstração](#-vídeo-de-demonstração)
-
+    
 ---
 
 ##  Objetivos do Projeto
