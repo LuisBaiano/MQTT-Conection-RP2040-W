@@ -1,41 +1,35 @@
 
-# Pico W MQTT: Sistema de Monitoramento e Controle Agrícola Inteligente 🌾💧💡
-
-[![Linguagem C](https://img.shields.io/badge/Linguagem-C-blue.svg)](https://www.iso.org/standard/74528.html)
-[![Raspberry Pi Pico W](https://img.shields.io/badge/Plataforma-Raspberry%20Pi%20Pico%20W-brightgreen.svg)](https://www.raspberrypi.com/products/raspberry-pi-pico/)
-[![MQTT](https://img.shields.io/badge/Protocolo-MQTT-orange.svg)](https://mqtt.org/)
-[![Status do Projeto](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellowgreen.svg)](#) <!-- Ou Concluído, Arquivado, etc. -->
+# Pico W MQTT: Sistema de Monitoramento e Controle Agrícola Inteligente
 
 **Um sistema IoT robusto construído na Raspberry Pi Pico W para monitoramento agrícola em tempo real e controle local de atuadores, utilizando MQTT para publicação de dados e estados.**
 
 ---
 
-## 📖 Índice
+##  Índice
 
-- [Pico W MQTT: Sistema de Monitoramento e Controle Agrícola Inteligente 🌾💧💡](#pico-w-mqtt-sistema-de-monitoramento-e-controle-agrícola-inteligente-)
-  - [📖 Índice](#-índice)
-  - [🎯 Objetivos do Projeto](#-objetivos-do-projeto)
-  - [📝 Descrição do Projeto](#-descrição-do-projeto)
-    - [📊 Fluxo de Dados e Controle](#-fluxo-de-dados-e-controle)
-    - [📡 Comunicação MQTT e Feedback Local](#-comunicação-mqtt-e-feedback-local)
-  - [✨ Funcionalidades Implementadas](#-funcionalidades-implementadas)
-  - [🛠️ Requisitos Técnicos Atendidos](#️-requisitos-técnicos-atendidos)
-  - [🚀 Como Executar](#-como-executar)
-    - [🔩 Requisitos de Hardware](#-requisitos-de-hardware)
-    - [💻 Requisitos de Software](#-requisitos-de-software)
-    - [⚙️ Configuração](#️-configuração)
-    - [🔧 Compilação e Gravação](#-compilação-e-gravação)
-    - [📡 Configuração do Broker MQTT](#-configuração-do-broker-mqtt)
-    - [🧪 Testes](#-testes)
-  - [🏗️ Estrutura do Código](#️-estrutura-do-código)
-  - [💡 Melhorias Futuras](#-melhorias-futuras)
-  - [🤝 Como Contribuir (Opcional)](#-como-contribuir-opcional)
-  - [📜 Licença (Opcional)](#-licença-opcional)
-  - [🎬 Vídeo de Demonstração](#-vídeo-de-demonstração)
+- [Pico W MQTT: Sistema de Monitoramento e Controle Agrícola Inteligente ](#pico-w-mqtt-sistema-de-monitoramento-e-controle-agrícola-inteligente-)
+  - [ Índice](#-índice)
+  - [ Objetivos do Projeto](#-objetivos-do-projeto)
+  - [ Descrição do Projeto](#-descrição-do-projeto)
+    - [ Fluxo de Dados e Controle](#-fluxo-de-dados-e-controle)
+    - [ Comunicação MQTT e Feedback Local](#-comunicação-mqtt-e-feedback-local)
+  - [ Funcionalidades Implementadas](#-funcionalidades-implementadas)
+  - [ Como Executar](#-como-executar)
+    - [ Requisitos de Hardware](#-requisitos-de-hardware)
+    - [ Requisitos de Software](#-requisitos-de-software)
+    - [ Configuração](#️-configuração)
+    - [ Compilação e Gravação](#-compilação-e-gravação)
+    - [ Configuração do Broker MQTT](#-configuração-do-broker-mqtt)
+    - [ Testes](#-testes)
+  - [ Estrutura do Código](#️-estrutura-do-código)
+  - [ Melhorias Futuras](#-melhorias-futuras)
+  - [ Como Contribuir (Opcional)](#-como-contribuir-opcional)
+  - [ Licença (Opcional)](#-licença-opcional)
+  - [ Vídeo de Demonstração](#-vídeo-de-demonstração)
 
 ---
 
-## 🎯 Objetivos do Projeto
+##  Objetivos do Projeto
 
 *   Desenvolver um dispositivo IoT robusto na Raspberry Pi Pico W para monitoramento agrícola.
 *   Coletar dados ambientais em tempo real: temperatura e umidade do ar (DHT22) e luminosidade ambiente (LDR).
@@ -48,7 +42,7 @@
 
 ---
 
-## 📝 Descrição do Projeto
+##  Descrição do Projeto
 
 Este projeto transforma a Raspberry Pi Pico W em um **"Nó Agrícola Inteligente"**. O sistema se conecta a uma rede Wi-Fi, estabelece uma conexão com um broker MQTT e, em seguida, monitora continuamente as condições ambientais usando sensores reais. Esses dados são publicados periodicamente em tópicos MQTT específicos. Adicionalmente, o sistema permite o **controle local de atuadores simulados (irrigação e iluminação) através de botões físicos no dispositivo**, e o estado desses atuadores é subsequentemente publicado via MQTT.
 
@@ -58,7 +52,7 @@ Este projeto transforma a Raspberry Pi Pico W em um **"Nó Agrícola Inteligente
     ![Diagrama do Sistema](caminho/para/seu/diagrama.png)
 -->
 
-### 📊 Fluxo de Dados e Controle
+###  Fluxo de Dados e Controle
 
 1.  **Coleta de Dados dos Sensores (Reais e Simulados):**
     *   **DHT22 (Sensor Externo):** Coleta leituras reais de **Temperatura do Ar** e **Umidade do Ar**.
@@ -78,19 +72,19 @@ Este projeto transforma a Raspberry Pi Pico W em um **"Nó Agrícola Inteligente
         *   Ícone de lâmpada quando "Luz Artificial" está LIGADA (se irrigação estiver desligada).
         *   Matriz é limpa quando os atuadores estão DESLIGADOS.
     *   **LED RGB (GPIO/PWM):** Indica o status geral do sistema:
-        *   (ex: 🟡 Amarelo: Conectando Wi-Fi)
-        *   (ex: 🔵 Ciano: Conectando MQTT)
-        *   (ex: 🟢 Verde: Wi-Fi & MQTT Conectados)
-        *   (ex: 🔴 Vermelho: Erro - Falha no Wi-Fi ou MQTT)
+        *   (ex: Amarelo: Conectando Wi-Fi)
+        *   (ex: Azul: Conectando MQTT)
+        *   (ex: Verde Azulado: Wi-Fi & MQTT Conectados)
+        *   (ex: Vermelho: Erro - Falha no Wi-Fi ou MQTT)
     *   **LED Integrado do Pico W:** Pisca se o Wi-Fi está conectado, mas o MQTT não; totalmente apagado quando o MQTT está conectado.
 
-### 📡 Comunicação MQTT e Feedback Local
+###  Comunicação MQTT e Feedback Local
 
 A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma conexão bem-sucedida, o estado inicial dos relés (controlados localmente) é publicado. As funções `mqtt_incoming_publish_cb` e `mqtt_incoming_data_cb` atualmente apenas logam no console serial as mensagens recebidas nos tópicos em que o Pico W possa estar inscrito por padrão ou para fins de depuração, sem processá-las para controle de atuadores.
 
 ---
 
-## ✨ Funcionalidades Implementadas
+##  Funcionalidades Implementadas
 
 ✅ Conexão Wi-Fi (Modo Estação) com tratamento de erros.
 ✅ Implementação de Cliente MQTT (LwIP) para conexão a um broker.
@@ -123,21 +117,9 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 
 ---
 
-## 🛠️ Requisitos Técnicos Atendidos
+##  Como Executar
 
-*(Esta seção normalmente se alinha com critérios específicos de um curso ou projeto. Adapte conforme necessário.)*
-
-1.  **Funcionalidade Principal:** O sistema conecta-se com sucesso ao Wi-Fi e a um broker MQTT, publica dados dos sensores e os estados dos atuadores. Atuadores são controlados localmente.
-2.  **Integração de Periféricos:** Demonstra uso e integração eficazes de DHT22, LDR, Joystick (ADC), Botões (com debouncer), OLED (I2C), Matriz de LEDs (PIO) e LED RGB.
-3.  **Comunicação de Rede:** Implementa conectividade Wi-Fi robusta e operações de cliente MQTT (conectar, publicar, callbacks básicos) usando LwIP.
-4.  **Qualidade do Código:** Código organizado em múltiplos arquivos (`.c` e `.h`), com nomes claros e comentários que auxiliam no entendimento.
-5.  **Princípios de Sistemas Embarcados:** Utiliza operações temporizadas não bloqueantes (verificações de tempo), callbacks para eventos assíncronos (MQTT, DNS) e gerencia o estado do dispositivo.
-
----
-
-## 🚀 Como Executar
-
-### 🔩 Requisitos de Hardware
+###  Requisitos de Hardware
 
 *   Raspberry Pi Pico W.
 *   Cabo Micro-USB para alimentação e programação.
@@ -155,7 +137,7 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 *   Acesso a uma rede Wi-Fi (2.4 GHz).
 *   Um Broker MQTT (ex: Mosquitto instalado localmente, HiveMQ Cloud, Adafruit IO).
 
-### 💻 Requisitos de Software
+###  Requisitos de Software
 
 *   **Pico SDK** (ex: v1.5.1 ou compatível).
 *   **CMake** (versão 3.13 ou superior).
@@ -264,7 +246,7 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 
 ---
 
-## 🏗️ Estrutura do Código
+##  Estrutura do Código
 
 
 .
