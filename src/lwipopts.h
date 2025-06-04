@@ -26,7 +26,7 @@
 #endif
 #define MEMP_NUM_TCP_SEG            32
 #define MEMP_NUM_ARP_QUEUE          10
-#define PBUF_POOL_SIZE              24
+#define PBUF_POOL_SIZE              48
 #define LWIP_ARP                    1
 #define LWIP_ETHERNET               1
 #define LWIP_ICMP                   1
@@ -105,7 +105,6 @@
 #define TCP_WND  16384
 #endif // MQTT_CERT_INC
 
-// This defaults to 4
-#define MQTT_REQ_MAX_IN_FLIGHT 5
+#define MQTT_REQ_MAX_IN_FLIGHT 7
 
 #endif

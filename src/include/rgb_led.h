@@ -6,10 +6,9 @@
 
 // luz de status do sistema
 #define RGB_OFF     0, 0, 0
-#define RGB_ERROR   1, 0, 0                     // Vermelho
-#define RGB_CONNECTING 1, 1, 0     // Laranja (R + um pouco de G)
-#define RGB_SERVER_OK 0, 1, 0                 // Verde
-#define RGB_MQTT_OK   0, 0 ,1 // Azul
+#define RGB_ERROR   1, 0, 0 
+#define RGB_CONNECTING 1, 1, 0 
+#define RGB_MQTT_OK   0, 1 ,1
 
 void rgb_led_init(void);
 void rgb_led_set(bool r, bool g, bool b);

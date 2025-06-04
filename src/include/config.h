@@ -1,5 +1,6 @@
 #ifndef HARDWARE_CONFIG_H
 #define HARDWARE_CONFIG_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +20,8 @@
 
 // controle dos perifericos
 #include "hardware/pio.h"
-#include "buzzer.h"     
+#include "buzzer.h"  
+#include "buttons.h"   
 #include "joystick.h"     
 #include "rgb_led.h"    
 #include "led_matrix.h"
@@ -76,6 +78,7 @@
 #define DHT_READ_TIME_MS    2500
 #define LDR_READ_TIME_MS    500
 #define JOY_READ_TIME_MS    500
+#define OLED_UPDATE_INTERVAL_MS 1500
 
 // --- tempos do buzzer ---
 #define BUZZER_ALERT_FREQ      1500 // F#6 (mais agudo e rápido)

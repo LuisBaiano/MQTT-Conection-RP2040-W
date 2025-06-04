@@ -27,6 +27,7 @@ add_executable(${CMAKE_PROJECT_NAME}
     main.c 
     include/lib/ssd1306/ssd1306.c
     include/buzzer.c
+    include/buttons.c
     include/debouncer.c
     include/display.c
     include/led_matrix.c
