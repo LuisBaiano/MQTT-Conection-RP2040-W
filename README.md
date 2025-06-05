@@ -245,6 +245,7 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 
 ## Estrutura do Código
 
+```
 .
 ├── build/                  # Diretório de compilação (gerado)
 ├── include/
@@ -284,3 +285,4 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 ├── pico_sdk_import.cmake   # Importação padrão do Pico SDK
 ├── .gitignore
 └── README.md
+```
