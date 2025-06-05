@@ -4,6 +4,6 @@
 #include "pico/stdlib.h"
 
 void ldr_init_sensor(void);
-float ldr_read_percentage(void);
+bool ldr_light_detected(void);
 
 #endif // LDR_H

@@ -5,14 +5,15 @@
 #include "include/external/dht22.h"
 #include "include/external/ldr.h"
 
-// ----- GLOBAIS (COMO NO SEU CÓDIGO) -----
+// ----- GLOBAIS -----
 static ssd1306_t ssd_global;
 static char pico_ip_address[20] = "N/A";
+char estado_luz_str[16] = "N/A";
 
 static float temp_ar = 0.0f;
 static float umid_ar = 0.0f;
 static float luminosidade = 0.0f;
-static float reservatorio = 0.0f; // Simulado pelo joystick
+static float reservatorio = 0.0f;
 static bool rele_irrigacao = false;
 static bool rele_luz = false;
 
@@ -44,10 +45,7 @@ static void mqtt_init_client_info(MQTT_CLIENT_DATA_T* state);
 static void mqtt_start_client(MQTT_CLIENT_DATA_T* state);
 static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status);
 static void mqtt_pub_request_cb(void *arg, err_t err);
-static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len);
-static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags);
 static void mqtt_dns_found_cb(const char *hostname, const ip_addr_t *ipaddr, void *arg);
-static void mqtt_do_subscribe_topics(MQTT_CLIENT_DATA_T* state);
 static void mqtt_publish_float_data(MQTT_CLIENT_DATA_T* state, const char* topic_name, float value);
 static void mqtt_publish_string_data(MQTT_CLIENT_DATA_T* state, const char* topic_name, const char* value_str);
 static void mqtt_publish_rele_state(MQTT_CLIENT_DATA_T* state, const char* rele_topic_name, bool is_on);
@@ -63,21 +61,21 @@ int main() {
     dht22_init_sensor();
     ldr_init_sensor();
     joystick_init();
-    rgb_led_init();    // Para o LED RGB de status
+    rgb_led_init();   
     led_matrix_init();
     display_init(&ssd_global);
 
-    rgb_led_set(RGB_OFF); // Usando defines do SEU rgb_led.h (ex: 0,0,0)
+    rgb_led_set(RGB_OFF); 
     display_startup_screen(&ssd_global);
     display_message(&ssd_global, "Sistema OK", "Iniciando WiFi...");
 
     // ----- CONEXÃO WI-FI -----
     printf("WiFi: Inicializando cyw43...\n");
-    rgb_led_set(RGB_CONNECTING); // Amarelo/Laranja (ex: 1,1,0 do seu rgb_led.h)
+    rgb_led_set(RGB_CONNECTING);
 
     if (cyw43_arch_init_with_country(CYW43_COUNTRY_BRAZIL)) {
         printf("ERRO FATAL: cyw43_arch_init falhou\n");
-        rgb_led_set(RGB_ERROR); // Vermelho (ex: 1,0,0 do seu rgb_led.h)
+        rgb_led_set(RGB_ERROR);
         display_message(&ssd_global, "ERRO FATAL", "WiFi Init Falhou");
         return -1;
     }
@@ -91,7 +89,7 @@ int main() {
 
     if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
         printf("ERRO: Falha ao conectar ao Wi-Fi.\n");
-        rgb_led_set(RGB_ERROR); // Vermelho
+        rgb_led_set(RGB_ERROR);
         display_message(&ssd_global, "WiFi ERRO", "Falha Conexao");
         cyw43_arch_gpio_put(LED_PIN, 1);
         return -1;
@@ -125,44 +123,45 @@ int main() {
         printf("MQTT: Resolucao DNS em progresso...\n");
     } else {
         printf("ERRO: Falha DNS broker MQTT (%d).\n", dns_err);
-        rgb_led_set(RGB_ERROR); // Vermelho
+        rgb_led_set(RGB_ERROR);
         display_message(&ssd_global, pico_ip_address, "ERRO DNS MQTT");
     }
 
     // ----- LOOP PRINCIPAL -----
-     printf("Entrando no loop principal.\n");
+    printf("Entrando no loop principal.\n");
     while (true) {
         cyw43_arch_poll();
 
         // Leitura dos Sensores (DHT, LDR, Joystick para reservatório)
         if (time_us_32() - last_dht_read_time > (DHT_READ_TIME_MS * 1000)) {
-            // Use suas variáveis globais corretas para temp_ar e umid_ar
-            dht_read_data(&temp_ar, &umid_ar); // Atualiza temp_ar e umid_ar
+            dht_read_data(&temp_ar, &umid_ar);
             last_dht_read_time = time_us_32();
         }
-        if (time_us_32() - last_ldr_read_time > (LDR_READ_TIME_MS * 1000)) {
-            luminosidade = ldr_read_percentage();
-            last_ldr_read_time = time_us_32();
+    // Leitura do LDR (agora digital)
+    if (time_us_32() - last_ldr_read_time > (LDR_READ_TIME_MS * 1000)) {
+        bool ldr_do_state = ldr_light_detected();
+
+        if (ldr_do_state == false) { // Se for LOW
+            strcpy(estado_luz_str, "ALTA");
+        } else { // Se for HIGH
+            strcpy(estado_luz_str, "BAIXA");
         }
+        last_ldr_read_time = time_us_32();
+    }
+
         if (time_us_32() - last_joy_read_time > (JOY_READ_TIME_MS * 1000)) {
             uint16_t joy_val = read_adc(JOYSTICK_X_ADC_CHANNEL); // Ou o eixo que simula reservatório
             reservatorio = (joy_val / 4095.0f) * 100.0f; // Joystick simula 0-100%
             last_joy_read_time = time_us_32();
         }
 
-        // --- CONTROLE LOCAL DOS "RELÉS" E MATRIZ PELOS BOTÕES A e B ---
-        bool estado_irrigacao_mudou = false;
-        bool estado_luz_mudou = false;
-
         if (button_a_pressed()) { // Botão A controla Irrigação
             rele_irrigacao = !rele_irrigacao;
-            estado_irrigacao_mudou = true;
             printf("Botao A: Irrigacao -> %s\n", rele_irrigacao ? "ON" : "OFF");
         }
 
         if (button_b_pressed()) { // Botão B controla Luz Artificial
             rele_luz = !rele_luz;
-            estado_luz_mudou = true;
             printf("Botao B: Luz Artificial -> %s\n", rele_luz ? "ON" : "OFF");
         }
 
@@ -175,43 +174,30 @@ int main() {
             led_matrix_clear();
         }
 
-        // Publica o novo estado se mudou e MQTT está conectado
-        if (mqtt_state.connected) {
-            if (estado_irrigacao_mudou) {
-                mqtt_publish_rele_state(&mqtt_state, MQTT_TOPIC_IRRIGACAO_STATE, rele_irrigacao);
-            }
-            if (estado_luz_mudou) {
-                mqtt_publish_rele_state(&mqtt_state, MQTT_TOPIC_LUZ_STATE, rele_luz);
-            }
-        }
-
         // Publicação periódica dos dados dos sensores via MQTT
         if (mqtt_state.connected && (time_us_32() - last_mqtt_publish_time > (MQTT_PUBLISH_INTERVAL_MS * 1000))) {
-            // printf("MQTT PUB: T:%.1f U:%.1f L:%.1f R:%.1f\n", temp_ar, umid_ar, luminosidade, reservatorio);
+            printf("Dados Publicados via MQTT: Temp:%.1f Umid:%.1f Luz:%.1f Resrv:%.1f\n", temp_ar, umid_ar, luminosidade, reservatorio);
+
+            //Publicação dos dados do DHT22
             mqtt_publish_float_data(&mqtt_state, MQTT_TOPIC_TEMP_AR, temp_ar);
             mqtt_publish_float_data(&mqtt_state, MQTT_TOPIC_UMID_AR, umid_ar);
 
+            //Publicação dos dados do LDR com saída digital
+            mqtt_publish_string_data(&mqtt_state, MQTT_TOPIC_LUMINOSIDADE, estado_luz_str);
+
+            //Publicação dos dados do joystick que simula a capacidade preenchida de um reservatório de água
             char val_str_pub[16];
-
-            if (luminosidade > 75.0f) { 
-            strcpy(val_str_pub, "ALTA");
-            } else if (luminosidade > 25.0f) {
-                strcpy(val_str_pub, "MEDIA");
-            } else {
-                strcpy(val_str_pub, "BAIXA");
-            }
-            mqtt_publish_string_data(&mqtt_state, MQTT_TOPIC_LUMINOSIDADE, val_str_pub);
-
             if (reservatorio > 75.0f) {
                 strcpy(val_str_pub, "ALTO");
             } else if (reservatorio > 25.0f) {
                 strcpy(val_str_pub, "MEDIO");
             } else {
                 strcpy(val_str_pub, "BAIXO");
+                buzzer_play_tone(BUZZER_ALERT_FREQ, BUZZER_ALERT_ON_MS);
             }
             mqtt_publish_string_data(&mqtt_state, MQTT_TOPIC_RESERVATORIO, val_str_pub);
             
-            // Também publica o estado dos relés periodicamente, caso a publicação por mudança falhe ou para novos inscritos
+            //Publicação dos dados do relês simulados (via botão A e B e com representação na matriz de leds.)
             mqtt_publish_rele_state(&mqtt_state, MQTT_TOPIC_IRRIGACAO_STATE, rele_irrigacao);
             mqtt_publish_rele_state(&mqtt_state, MQTT_TOPIC_LUZ_STATE, rele_luz);
             
@@ -231,6 +217,11 @@ int main() {
 }
 
 // ----- IMPLEMENTAÇÕES DAS FUNÇÕES MQTT -----
+
+/**
+ * @brief Inicializa a estrutura de informações do cliente MQTT.
+ * Define o ID único do cliente, credenciais e configurações de conexão.
+ */
 static void mqtt_init_client_info(MQTT_CLIENT_DATA_T* state) {
     memset(state, 0, sizeof(MQTT_CLIENT_DATA_T));
     state->connected = false;
@@ -248,6 +239,10 @@ static void mqtt_init_client_info(MQTT_CLIENT_DATA_T* state) {
     state->client_info.will_retain = 0;
 }
 
+/**
+ * @brief Callback chamado após a resolução DNS do endereço do broker MQTT.
+ * Se bem-sucedido, armazena o IP e inicia a conexão MQTT; caso contrário, loga um erro.
+ */
 static void mqtt_dns_found_cb(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
     MQTT_CLIENT_DATA_T* state = (MQTT_CLIENT_DATA_T*)arg;
     if (ipaddr != NULL) {
@@ -261,6 +256,10 @@ static void mqtt_dns_found_cb(const char *hostname, const ip_addr_t *ipaddr, voi
     }
 }
 
+/**
+ * @brief Cria uma nova instância do cliente MQTT e tenta se conectar ao broker.
+ * Usa o endereço IP do broker resolvido anteriormente e as informações do cliente.
+ */
 static void mqtt_start_client(MQTT_CLIENT_DATA_T* state) {
     state->mqtt_client_inst = mqtt_client_new();
     if (state->mqtt_client_inst == NULL) { 
@@ -282,6 +281,10 @@ static void mqtt_start_client(MQTT_CLIENT_DATA_T* state) {
     }
 }
 
+/**
+ * @brief Callback chamado para tratar o status da conexão com o broker MQTT.
+ * Atualiza o estado de conexão, loga o status e, se conectado, publica o estado inicial dos relés.
+ */
 static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
     MQTT_CLIENT_DATA_T* state = (MQTT_CLIENT_DATA_T*)arg;
     if (status == MQTT_CONNECT_ACCEPTED) {
@@ -302,6 +305,10 @@ static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection
     }
 }
 
+/**
+ * @brief Callback chamado após uma tentativa de publicação MQTT.
+ * Loga se a publicação foi bem-sucedida ou se ocorreu algum erro.
+ */
 static void mqtt_pub_request_cb(void *arg, err_t err) {
     if (err != ERR_OK) {
         printf("ERRO: Publicacao MQTT falhou (err: %d)\n", err);
@@ -309,24 +316,10 @@ static void mqtt_pub_request_cb(void *arg, err_t err) {
     else { printf("MQTT: Publicacao bem-sucedida.\n"); }
 }
 
-static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len) {
-    printf("MQTT RX HDR (IGNORADO/OUTRO): Topico '%.*s'\n", (int)tot_len, topic);
-}
-
-static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags) {
-    printf("MQTT RX DATA (IGNORADO/OUTRO): Payload '%.*s'\n", len, data);
-}
-
-static void mqtt_do_subscribe_topics(MQTT_CLIENT_DATA_T* state) {
-
-    printf("MQTT: Configurando subscricoes (se houver)...\n");
-    cyw43_arch_lwip_begin();
-
-    cyw43_arch_lwip_end();
-    printf("MQTT: Subscricoes configuradas (ou nenhuma necessaria).\n");
-}
-
-// mqtt_publish_float_data: Permanece igual.
+/**
+ * @brief Publica um valor float em um tópico MQTT especificado.
+ * Converte o float para string e envia a mensagem para o broker.
+ */
 static void mqtt_publish_float_data(MQTT_CLIENT_DATA_T* state, const char* topic_name, float value) {
     if (!state->connected || !state->mqtt_client_inst) return;
     char payload_str[16];
@@ -337,22 +330,30 @@ static void mqtt_publish_float_data(MQTT_CLIENT_DATA_T* state, const char* topic
     cyw43_arch_lwip_end();
 }
 
+/**
+ * @brief Publica uma string em um tópico MQTT especificado.
+ * Envia a string como payload da mensagem para o broker.
+ */
 static void mqtt_publish_string_data(MQTT_CLIENT_DATA_T* state, const char* topic_name, const char* value_str) {
     if (!state->connected || !state->mqtt_client_inst) return;
     cyw43_arch_lwip_begin();
     mqtt_publish(state->mqtt_client_inst, topic_name, value_str, strlen(value_str),
-                 MQTT_QOS, MQTT_RETAIN_SENSOR_DATA,
-                 mqtt_pub_request_cb, state);
+                MQTT_QOS, MQTT_RETAIN_SENSOR_DATA,
+                mqtt_pub_request_cb, state);
     cyw43_arch_lwip_end();
 }
 
+/**
+ * @brief Publica o estado (ON/OFF) de um relé em um tópico MQTT especificado.
+ * Envia "ON" ou "OFF" como payload para o broker, refletindo o estado do relé.
+ */
 static void mqtt_publish_rele_state(MQTT_CLIENT_DATA_T* state, const char* rele_topic_name, bool is_on) {
     if (!state->connected || !state->mqtt_client_inst) return;
     const char* payload = is_on ? "ON" : "OFF";
     cyw43_arch_lwip_begin();
     mqtt_publish(state->mqtt_client_inst, rele_topic_name, payload, strlen(payload),
-                 MQTT_QOS, MQTT_RETAIN_STATE_DATA,
-                 mqtt_pub_request_cb, state);
+                MQTT_QOS, MQTT_RETAIN_STATE_DATA,
+                mqtt_pub_request_cb, state);
     cyw43_arch_lwip_end();
     printf("MQTT State PUB: %s -> %s\n", rele_topic_name, payload);
 }

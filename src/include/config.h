@@ -34,8 +34,7 @@
 #define DHT_PULSE_SAMPLE_TIME_US 35 
 
 // --- Configurações LDR ---
-#define LDR_ADC_PIN 28  //
-#define LDR_ADC_INPUT 2 // ADC input 0 corresponde a GP26
+#define LDR_DO_PIN 16  //
 #define ADC_VREF 3.3f
 #define ADC_RANGE (1 << 12) // 4096 (0-4095)
 

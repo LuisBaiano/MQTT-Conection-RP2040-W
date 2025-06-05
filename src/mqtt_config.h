@@ -20,10 +20,6 @@
 #define MQTT_TOPIC_LUMINOSIDADE        MQTT_TOPIC_BASE "/luminosity"
 #define MQTT_TOPIC_RESERVATORIO        MQTT_TOPIC_BASE "/reservoir_level"
 
-// Tópicos de Comando (Recebidos PELO PICO para controlar atuadores)
-#define MQTT_TOPIC_IRRIGACAO_SET       MQTT_TOPIC_BASE "/irrigation/set"  // Corrigido para corresponder ao log anterior (era /irr/set)
-#define MQTT_TOPIC_LUZ_SET             MQTT_TOPIC_BASE "/light/set"
-
 // Tópicos de Estado (Publicados PELO PICO para feedback dos atuadores)
 #define MQTT_TOPIC_IRRIGACAO_STATE     MQTT_TOPIC_BASE "/irrigation/state" // Corrigido
 #define MQTT_TOPIC_LUZ_STATE           MQTT_TOPIC_BASE "/light/state"
