@@ -79,34 +79,36 @@ A função `mqtt_connection_cb` lida com o status da conexão MQTT. Após uma co
 
 ## Funcionalidades Implementadas
 
+```
 ✅ Conexão Wi-Fi (Modo Estação) com tratamento de erros.
 ✅ Implementação de Cliente MQTT (LwIP) para conexão a um broker.
 ✅ Geração de Client ID único baseado no ID da placa Pico.
 ✅ Callback de status da conexão MQTT.
 ✅ Resolução DNS para o hostname do broker MQTT.
-✅ **Publicação de Dados dos Sensores via MQTT:**
+✅ Publicação de Dados dos Sensores via MQTT:
     ✅ Temperatura do Ar (DHT22) - valor numérico.
     ✅ Umidade do Ar (DHT22) - valor numérico.
     ✅ Luminosidade (LDR) - como "BAIXA", "MEDIA", "ALTA".
     ✅ Nível Simulado do Reservatório (Joystick) - como "BAIXO", "MEDIO", "ALTO".
-✅ **Controle Local de Atuadores via Botões:**
+✅ Controle Local de Atuadores via Botões:
     ✅ Controle de Irrigação (LIGA/DESLIGA).
     ✅ Controle de Luz Artificial (LIGA/DESLIGA).
 ✅ Publicação dos Estados dos Atuadores via MQTT (loop de feedback após controle local).
-✅ **Leitura de Sensores em Tempo Real:**
+✅ Leitura de Sensores em Tempo Real:
     ✅ DHT22 para temperatura e umidade.
     ✅ LDR para luminosidade.
-✅ **Simulação Interativa:**
+✅ Simulação Interativa:
     ✅ Joystick para entrada do nível do reservatório.
     ✅ Botões para controle dos atuadores.
-✅ **Feedback Visual Local:**
+✅ Feedback Visual Local:
     ✅ Display OLED: IP Wi-Fi, status MQTT, valores dos sensores, estados dos atuadores.
     ✅ Matriz de LEDs: Ícones para atuadores ativos (gota d'água, lâmpada).
     ✅ LED RGB: Status do sistema (conectividade Wi-Fi, MQTT, erros).
     ✅ LED Integrado: Indicação de tentativa de conexão MQTT.
 ✅ Código Estruturado: Organização com arquivos de cabeçalho e implementação para periféricos.
-✅ Logging de Depuração: Saída serial (`printf`) para status e depuração.
-✅ Configuração Centralizada: Credenciais Wi-Fi (`credentials.h`), configurações MQTT (`mqtt_config.h`), pinos (`include/config.h`).
+✅ Logging de Depuração: Saída serial (printf) para status e depuração.
+✅ Configuração Centralizada: Credenciais Wi-Fi (credentials.h), configurações MQTT (mqtt_config.h), pinos (include/config.h).
+```
 
 ---
 
